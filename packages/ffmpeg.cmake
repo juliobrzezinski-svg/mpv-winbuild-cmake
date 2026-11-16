@@ -25,6 +25,7 @@ ExternalProject_Add(ffmpeg
         --enable-libopus
         --enable-libvorbis
         --enable-libdav1d
+        --enable-ffnvcodec   # needed explicitly because of --disable-autodetect (cuvid/nvdec depend on it)
         --enable-cuda-llvm
         --enable-cuvid
         --enable-nvdec
