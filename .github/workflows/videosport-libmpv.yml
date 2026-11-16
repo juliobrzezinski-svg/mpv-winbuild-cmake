@@ -47,6 +47,10 @@ jobs:
           restore-keys: |
             vslgpl-gcc-x86_64_toolchain
 
+      - name: Dropping stale package stamps from the cache
+        # Only the toolchain is cached; src_packages is not, so cached "downloaded" stamps would break `update`.
+        run: rm -rf build_$BIT/packages build_$BIT/mpv-*
+
       - name: Configuring (plain x86_64, NOT x86-64-v3)
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DGCC_ARCH=x86-64 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -DENABLE_CCACHE=ON --fresh -G Ninja -B build_$BIT -S $PWD
