@@ -82,11 +82,14 @@ jobs:
           tag="videosport-lgpl-${sha}-${date}"
           dll="$dir/libmpv-2.dll"
           # mpv-configuration and the FFmpeg configuration are embedded in the DLL as plain strings.
-          { echo "# strings extracted from libmpv-2.dll"; strings -a "$dll" | grep -E -- '^ ?(-D[a-z0-9_-]+=|--enable-|--disable-|--prefix=|--arch=)' || true; } > "$dir/mpv-configuration.txt"
+          # strings to a file first: `strings | grep -q` under pipefail gives false negatives (SIGPIPE).
+          strings -a "$dll" > /tmp/dll-strings.txt
+          { echo "# strings extracted from libmpv-2.dll"; grep -E -- '^ ?(-D[a-z0-9_-]+=|--enable-|--disable-|--prefix=|--arch=|--cross-prefix=)' /tmp/dll-strings.txt || true; } > "$dir/mpv-configuration.txt"
           head -80 "$dir/mpv-configuration.txt"
-          if strings -a "$dll" | grep -q -- '--enable-gpl'; then echo "ERROR: FFmpeg inside DLL is GPL"; exit 1; fi
-          if strings -a "$dll" | grep -q -- '--enable-nonfree'; then echo "ERROR: nonfree"; exit 1; fi
-          if ! strings -a "$dll" | grep -q -- '-Dgpl=false'; then echo "ERROR: -Dgpl=false not found in DLL"; exit 1; fi
+          if grep -q -- '--enable-gpl' /tmp/dll-strings.txt; then echo "ERROR: FFmpeg inside DLL is GPL"; exit 1; fi
+          if grep -q -- '--enable-nonfree' /tmp/dll-strings.txt; then echo "ERROR: nonfree"; exit 1; fi
+          if grep -q -- '--enable-version3' /tmp/dll-strings.txt; then echo "ERROR: version3"; exit 1; fi
+          if ! grep -q -- '-Dgpl=false' /tmp/dll-strings.txt; then echo "ERROR: -Dgpl=false not found in DLL"; exit 1; fi
           mkdir -p out
           cp -r "$dir" "out/libmpv-lgpl-x86_64-${sha}-${date}"
           cd out
