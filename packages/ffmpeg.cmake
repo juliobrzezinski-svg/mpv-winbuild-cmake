@@ -1,49 +1,12 @@
 ExternalProject_Add(ffmpeg
+    # videoSport LGPL build: only libs needed for PLAYBACK (all BSD/MIT/ISC).
+    # Removed vs upstream: openssl, libssh, libsrt, x264, x265, rubberband, vapoursynth, dvd/bluray, lame, ...
     DEPENDS
-        amf-headers
-        avisynth-headers
         nvcodec-headers
-        bzip2
-        lame
-        lcms2
-        openssl
-        libssh
-        libsrt
-        libass
-        libbluray
-        libdvdnav
-        libdvdread
-        libmodplug
-        libpng
-        libsoxr
-        libbs2b
-        libvpx
-        libwebp
-        libzimg
-        libmysofa
-        fontconfig
-        harfbuzz
         opus
-        speex
         vorbis
-        x264
-        ${ffmpeg_x265}
-        libxml2
-        libvpl
-        libopenmpt
-        libjxl
-        libplacebo
-        libzvbi
-        libaribcaption
-        aom
-        svtav1
         dav1d
-        vapoursynth
-        ${ffmpeg_uavs3d}
-        ${ffmpeg_davs2}
-        rubberband
-        libva
-        openal-soft
+        zlib
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
@@ -57,61 +20,27 @@ ExternalProject_Add(ffmpeg
         --pkg-config-flags=--static
         --enable-cross-compile
         --enable-runtime-cpudetect
-        --enable-gpl
-        --enable-version3
-        --enable-avisynth
-        --enable-vapoursynth
-        --enable-libass
-        --enable-libbluray
-        --enable-libdvdnav
-        --enable-libdvdread
-        --enable-libfreetype
-        --enable-libfribidi
-        --enable-libfontconfig
-        --enable-libharfbuzz
-        --enable-libmodplug
-        --enable-libopenmpt
-        --enable-libmp3lame
-        --enable-lcms2
+        # videoSport LGPL build: NO --enable-gpl, NO --enable-version3, NO --enable-nonfree
+        # (result is LGPL-2.1+). Only BSD/MIT/ISC external libs are enabled.
         --enable-libopus
-        --enable-libsoxr
-        --enable-libspeex
         --enable-libvorbis
-        --enable-libbs2b
-        --enable-librubberband
-        --enable-libvpx
-        --enable-libwebp
-        --enable-libx264
-        --enable-libx265
-        --enable-libaom
-        --enable-libsvtav1
         --enable-libdav1d
-        ${ffmpeg_davs2_cmd}
-        ${ffmpeg_uavs3d_cmd}
-        --enable-libzimg
-        --enable-openssl
-        --enable-libxml2
-        --enable-libmysofa
-        --enable-libssh
-        --enable-libsrt
-        --enable-libvpl
-        --enable-libjxl
-        --enable-libplacebo
-        --enable-libzvbi
-        --enable-libaribcaption
         --enable-cuda-llvm
         --enable-cuvid
         --enable-nvdec
-        --enable-nvenc
-        --enable-amf
-        --enable-openal
+        --disable-nvenc
+        --disable-amf
+        --disable-vaapi
+        --disable-vdpau
+        --disable-videotoolbox
+        --disable-network
+        --disable-autodetect
+        --enable-d3d11va
+        --enable-dxva2
+        --enable-zlib
         --disable-doc
         --disable-ffplay
         --disable-ffprobe
-        --enable-vaapi
-        --disable-vdpau
-        --disable-videotoolbox
-        --disable-decoder=libaom_av1
         ${ffmpeg_lto}
         --extra-cflags='-Wno-error=int-conversion'
         "--extra-libs='${ffmpeg_extra_libs}'" # -lstdc++ / -lc++ needs by libjxl and shaderc

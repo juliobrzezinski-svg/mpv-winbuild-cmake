@@ -1,30 +1,21 @@
 ExternalProject_Add(mpv
+    # videoSport LGPL build: dropped libarchive, libdvdnav/libdvdread, luajit, rubberband, openal-soft,
+    # mujs, vapoursynth, libsdl2, subrandr, libsixel, curl (GPL-only or not needed for local playback).
     DEPENDS
         angle-headers
         ffmpeg
         fribidi
         lcms2
-        libarchive
         libass
-        libdvdnav
-        libdvdread
         libiconv
         libjpeg
         libpng
-        luajit
-        rubberband
+        libzimg
         uchardet
-        openal-soft
-        mujs
         vulkan
         shaderc
         libplacebo
         spirv-cross
-        vapoursynth
-        libsdl2
-        subrandr
-        libsixel
-        curl
     GIT_REPOSITORY https://github.com/mpv-player/mpv.git
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
@@ -41,24 +32,29 @@ ExternalProject_Add(mpv
         -Db_lto=true
         ${mpv_lto_mode}
         -Dlibmpv=true
-        -Dpdf-build=enabled
-        -Dlua=enabled
-        -Djavascript=enabled
-        -Dsdl2-gamepad=enabled
-        -Dlibarchive=enabled
-        -Dlibbluray=enabled
-        -Ddvdnav=enabled
+        # videoSport LGPL build: -Dgpl=false makes mpv itself LGPL-2.1+ (GPL-only features are compiled out).
+        -Dgpl=false
+        -Dpdf-build=disabled
+        -Dmanpage-build=disabled
+        -Dlua=disabled
+        -Djavascript=disabled
+        -Dsdl2-gamepad=disabled
+        -Dlibarchive=disabled
+        -Dlibbluray=disabled
+        -Ddvdnav=disabled
+        -Dcdda=disabled
+        -Ddvda=disabled
         -Duchardet=enabled
-        -Drubberband=enabled
+        -Drubberband=disabled
         -Dlcms2=enabled
-        -Dopenal=enabled
+        -Dopenal=disabled
         -Dspirv-cross=enabled
         -Dvulkan=enabled
-        -Dvapoursynth=enabled
-        -Dsubrandr=enabled
-        -Dsixel=enabled
+        -Dvapoursynth=disabled
+        -Dsubrandr=disabled
+        -Dsixel=disabled
         ${mpv_gl}
-        -Dlibcurl=enabled
+        -Dlibcurl=disabled
         -Dc_args='-Wno-error=int-conversion'
     BUILD_COMMAND ${EXEC} LTO_JOB=1 PDB=1 ninja -C <BINARY_DIR>
     INSTALL_COMMAND ""
@@ -77,7 +73,6 @@ ExternalProject_Add_Step(mpv copy-binary
     COMMAND ${CMAKE_COMMAND} -E copy <BINARY_DIR>/mpv.com                           ${CMAKE_CURRENT_BINARY_DIR}/mpv-package/mpv.com
     COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/etc/mpv-register.bat              ${CMAKE_CURRENT_BINARY_DIR}/mpv-package/mpv-register.bat
     COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/etc/mpv-unregister.bat            ${CMAKE_CURRENT_BINARY_DIR}/mpv-package/mpv-unregister.bat
-    COMMAND ${CMAKE_COMMAND} -E copy <BINARY_DIR>/mpv.pdf                           ${CMAKE_CURRENT_BINARY_DIR}/mpv-package/doc/manual.pdf
     COMMAND ${CMAKE_COMMAND} -E copy ${MINGW_INSTALL_PREFIX}/etc/fonts/fonts.conf   ${CMAKE_CURRENT_BINARY_DIR}/mpv-package/mpv/fonts.conf
     ${mpv_copy_debug}
     COMMAND ${CMAKE_COMMAND} -E copy <BINARY_DIR>/libmpv-2.dll          ${CMAKE_CURRENT_BINARY_DIR}/mpv-dev/libmpv-2.dll
