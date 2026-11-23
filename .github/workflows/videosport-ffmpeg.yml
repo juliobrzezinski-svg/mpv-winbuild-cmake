@@ -1,0 +1,139 @@
+# videoSport: builds a minimal static GPL FFmpeg (ffmpeg.exe + ffprobe.exe) for Windows x86_64, checks it on a
+# Windows runner and publishes it with its complete corresponding source. Recipe: videosport-ffmpeg/ (see
+# README_videosport.md).
+name: videosport ffmpeg gpl
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Create a GitHub Release with the FFmpeg package and its sources'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Building static FFmpeg (x86_64)
+    runs-on: ubuntu-24.04
+    outputs:
+      name: ${{ steps.meta.outputs.name }}
+      date: ${{ steps.meta.outputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installing the mingw-w64 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mingw-w64 nasm meson ninja-build pkg-config make curl git python3
+          x86_64-w64-mingw32-gcc --version | head -1
+
+      - id: meta
+        run: |
+          date=$(date -u +%Y%m%d)
+          echo "date=$date" >> $GITHUB_OUTPUT
+          echo "name=videosport-ffmpeg-n8.0.1-x86_64-$date" >> $GITHUB_OUTPUT
+
+      - name: Building
+        env:
+          BUILD_DATE: ${{ steps.meta.outputs.date }}
+          PKG_NAME: ${{ steps.meta.outputs.name }}
+        run: bash videosport-ffmpeg/build.sh "$RUNNER_TEMP/work" out
+
+      - name: Collecting logs
+        if: failure()
+        run: |
+          mkdir -p logs
+          cp -f "$RUNNER_TEMP"/work/ffmpeg-build/ffbuild/config.log logs/ 2>/dev/null || true
+          cp -f "$RUNNER_TEMP"/work/dav1d-build/meson-logs/meson-log.txt logs/ 2>/dev/null || true
+          cp -f "$RUNNER_TEMP"/work/src/*/config.log logs/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ffmpeg-build-logs
+          path: logs
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-package
+          path: out/package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-sources
+          path: out/sources
+
+  check:
+    name: Checking on Windows
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ffmpeg-package
+          path: package
+      - name: Running checks
+        run: bash videosport-ffmpeg/check.sh "package/${{ needs.build.outputs.name }}" checks
+      - name: Packaging
+        run: |
+          name="${{ needs.build.outputs.name }}"
+          mkdir -p release
+          cd package
+          7z a -tzip -mx=9 "../release/$name.zip" "$name"
+          cd ../release
+          for f in ffmpeg-version ffmpeg-buildconf ffmpeg-encoders ffmpeg-decoders ffmpeg-filters ffmpeg-demuxers ffmpeg-muxers ffprobe-version; do
+            cp "../checks/$f.txt" "$f.txt"
+          done
+          cp "../package/$name/licenses/FFmpeg-COPYING.GPLv2.txt" COPYING.GPLv2.txt
+          sha256sum "$name.zip" | tee "$name.zip.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-release
+          path: release
+
+  release:
+    name: Release
+    needs: [build, check]
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.release != 'false' }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ffmpeg-release
+          path: out
+      - uses: actions/download-artifact@v4
+        with:
+          name: ffmpeg-sources
+          path: out
+      - name: Create release
+        run: |
+          tag="videosport-ffmpeg-n8.0.1-${{ needs.build.outputs.date }}"
+          name="${{ needs.build.outputs.name }}"
+          sha=$(cut -d' ' -f1 "out/$name.zip.sha256")
+          cat > notes.md <<EOF
+          Static GPL FFmpeg n8.0.1 for Windows x86_64 (ffmpeg.exe + ffprobe.exe, no DLLs), built by
+          videosport-ffmpeg.yml from branch videosport-lgpl at ${{ github.sha }}.
+
+          External libraries: libx264, libvpx, libopus, libdav1d, zlib (pinned, see SOURCES.md). All native FFmpeg
+          decoders, encoders, demuxers, muxers, parsers, filters and file protocols are kept; network, ffplay, docs
+          and autodetection are disabled. Licence: GPL-2.0-or-later (COPYING.GPLv2.txt).
+
+          SHA-256 of $name.zip: \`$sha\`
+
+          Corresponding source (GPL): one archive per component (src-*.tar.gz, exact commits/tarballs) plus the build
+          recipe (src-recipe-videosport-ffmpeg-*.tar.gz); details and checksums in SOURCES.md.
+          EOF
+          sed -i 's/^          //' notes.md
+          gh release create "$tag" out/* --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "$tag" --notes-file notes.md
