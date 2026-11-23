@@ -2,6 +2,8 @@ ExternalProject_Add(dav1d
     DEPENDS
         xxhash
     GIT_REPOSITORY https://code.videolan.org/videolan/dav1d.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 9a03b544c0ad0edcf881441663b4f5492b819cde
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

@@ -34,3 +34,39 @@ available on distribution.
 ## Verify
 `strings -a libmpv-2.dll | grep -- '-Dgpl=false'` must match; `strings -a libmpv-2.dll | grep -- '--enable-gpl'` must
 NOT match. The package also contains `mpv-configuration.txt` (extracted strings).
+
+## Pinned sources (corresponding source of release videosport-lgpl-543a8c2c59-20261116)
+Upstream recipes follow git HEAD. Since 2026-11-23 every package that ends up in `libmpv-2.dll` is pinned with
+`GIT_TAG <commit>` (and `GIT_REMOTE_NAME` removed, which `force_rebuild_git` treats as "fixed commit") to the
+commit used by run 43909773666 (recipe commit `babc0c4`), which produced the release
+`videosport-lgpl-543a8c2c59-20261116`. `toolchain/mingw-w64.cmake` is pinned too (the toolchain of that run came
+from the cache built by run 43896080503). libiconv, opus-dnn, gcc and binutils were already fixed tarballs.
+
+How the commits were determined (full table with method per package in `SOURCES.md` / `sources.json`, assets of
+that release, together with one source archive per package and the recipe archive):
+- read from version strings embedded in the DLL (mpv, FFmpeg, libass, libplacebo, libopus, dav1d, SPIRV-Cross),
+  or from the package name in the run log (mpv `git-543a8c2c59`);
+- the rest reconstructed as `git rev-list -1 --first-parent --before=2026-11-16T16:49:29Z origin/<branch>`
+  (the `ninja update` step fetched and reset every package to its upstream branch at about that time;
+  `<branch>` is the recipe's `GIT_TAG`, or `master` when none, which is CMake's ExternalProject default).
+  For dav1d the date method would have picked a commit pushed later, so the embedded string wins.
+
+Not pinned: the build container `ghcr.io/shinchiro/archlinux:latest` (the digest used on 2026-11-16 is no longer
+in the registry) and the other packages of the upstream recipe that libmpv does not use. A rebuild therefore
+reproduces the same sources, not necessarily a bit-identical DLL. To move to newer upstream code, update the
+`GIT_TAG` lines and publish the matching sources with the new release.
+
+# videoSport static GPL FFmpeg (videosport-ffmpeg/)
+Separate from libmpv. `videosport-ffmpeg/build.sh` cross-compiles on Ubuntu (distro mingw-w64) a fully static
+`ffmpeg.exe` + `ffprobe.exe` (no DLLs) of FFmpeg n8.0.1 with `--enable-gpl` and only libx264, libvpx, libopus,
+libdav1d and zlib, all pinned in `videosport-ffmpeg/versions.sh` (commit or tarball SHA-256). Every native
+decoder/encoder/demuxer/muxer/parser/filter and the file protocols are kept; network, ffplay, docs and
+autodetection are off (`--enable-w32threads` explicitly, since `--disable-autodetect` drops it).
+`videosport-ffmpeg/check.sh` checks the binary on Windows (encoders libx264/aac/libvpx-vp9/libopus, decoders
+hevc/h264/aac/libdav1d, filters, concat demuxer, test encodes).
+
+Workflow `videosport-ffmpeg.yml`: on push to the recipe it only builds and checks; `workflow_dispatch`
+(`gh workflow run videosport-ffmpeg.yml --ref videosport-lgpl`) also creates the Release
+`videosport-ffmpeg-n8.0.1-<yyyymmdd>` with the .zip, its SHA-256, the `-version/-buildconf/-encoders/-decoders/
+-filters` outputs, COPYING.GPLv2, one source archive per component, the recipe archive and `SOURCES.md`.
+Licence of the result: GPL-2.0-or-later.

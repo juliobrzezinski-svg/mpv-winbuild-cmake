@@ -4,8 +4,8 @@ ExternalProject_Add(vulkan
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    # videoSport: pinned (was main) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 0b137080f608a1f99527f1b123424545f2d9ba49
     CONFIGURE_COMMAND ${EXEC} CONF=1 cmake -H<SOURCE_DIR> -B<BINARY_DIR>
         -G Ninja
         -DCMAKE_BUILD_TYPE=Release

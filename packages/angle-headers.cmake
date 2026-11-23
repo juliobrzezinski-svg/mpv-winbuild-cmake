@@ -1,8 +1,8 @@
 ExternalProject_Add(angle-headers
     GIT_REPOSITORY https://github.com/google/angle.git
     SOURCE_DIR ${SOURCE_LOCATION}
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    # videoSport: pinned (was main) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 46005797c554ed7712b9f60939d231e00572e309
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone include/EGL include/KHR"
     GIT_SUBMODULES ""

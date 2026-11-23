@@ -7,8 +7,8 @@ ExternalProject_Add(fontconfig
     GIT_REPOSITORY https://gitlab.freedesktop.org/fontconfig/fontconfig.git
     SOURCE_DIR ${SOURCE_LOCATION}
     UPDATE_COMMAND ""
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    # videoSport: pinned (was main) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 548591665a8e0dcf5c49cc34fb59ad34c503fa1a
     GIT_CLONE_FLAGS "--filter=tree:0"
     PATCH_COMMAND ${EXEC} git am --3way ${CMAKE_CURRENT_SOURCE_DIR}/fontconfig-*.patch
     CONFIGURE_COMMAND ""

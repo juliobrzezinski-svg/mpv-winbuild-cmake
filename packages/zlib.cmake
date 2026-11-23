@@ -3,8 +3,8 @@ ExternalProject_Add(zlib
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
-    GIT_REMOTE_NAME origin
-    GIT_TAG develop
+    # videoSport: pinned (was develop) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG a04670521df1c4274a23b7fc78478509838f74a2
     CONFIGURE_COMMAND ${EXEC} CONF=1 cmake -H<SOURCE_DIR> -B<BINARY_DIR>
         -G Ninja
         -DCMAKE_BUILD_TYPE=Release

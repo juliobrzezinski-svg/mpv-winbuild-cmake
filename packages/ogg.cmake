@@ -1,5 +1,7 @@
 ExternalProject_Add(ogg
     GIT_REPOSITORY https://github.com/xiph/ogg.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG be05b13e98b048f0b5a0f5fa8ce514d56db5f822
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

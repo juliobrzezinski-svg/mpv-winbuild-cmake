@@ -8,6 +8,8 @@ ExternalProject_Add(ffmpeg
         dav1d
         zlib
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 4dbee3b24151e8d5449d7c2255c5a76ecbdea238
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !tests/ref/fate"

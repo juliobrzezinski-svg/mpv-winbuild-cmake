@@ -4,6 +4,8 @@ ExternalProject_Add(freetype2
         zlib
         brotli
     GIT_REPOSITORY https://github.com/freetype/freetype.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG dbb00e529e69a2be629a9ef98498e4f9b188aab1
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     GIT_SUBMODULES ""

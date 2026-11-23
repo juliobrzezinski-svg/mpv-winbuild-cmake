@@ -1,6 +1,8 @@
 ExternalProject_Add(libpng
     DEPENDS zlib
     GIT_REPOSITORY https://github.com/glennrp/libpng.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG e88e1735a26788df76a570c59d1183c883e71401
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

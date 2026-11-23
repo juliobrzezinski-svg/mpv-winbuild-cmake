@@ -3,6 +3,8 @@ ExternalProject_Add(libxml2
         zlib
         libiconv
     GIT_REPOSITORY https://github.com/GNOME/libxml2.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 21c8223ac091b81d5914c52eb20b1b063e29cb92
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !result !test"

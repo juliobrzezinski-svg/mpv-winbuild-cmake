@@ -1,5 +1,7 @@
 ExternalProject_Add(brotli
     GIT_REPOSITORY https://github.com/google/brotli.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 3dce8720b74194027c7b4cf42dee5bd159786df5
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !tests !js !java !research"

@@ -3,6 +3,8 @@ ExternalProject_Add(lcms2
         libjpeg
         zlib
     GIT_REPOSITORY https://github.com/mm2/Little-CMS.git
+    # videoSport: pinned (was master) to the commit used by libmpv release videosport-lgpl-543a8c2c59-20261116
+    GIT_TAG 55c4c17b36a56d029fcd298b5aa4a97cfbe73f94
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
