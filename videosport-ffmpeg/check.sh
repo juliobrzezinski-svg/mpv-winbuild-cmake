@@ -3,7 +3,9 @@
 # Usage: videosport-ffmpeg/check.sh <dir with ffmpeg.exe> <outdir> [hevc_sample] [av1_sample]
 # Writes ffmpeg -version/-buildconf/-encoders/-decoders/-filters to <outdir> and runs the checks videoSport needs.
 set -uo pipefail
-BIN=$1; OUT=$(mkdir -p "$2" && cd "$2" && pwd); HEVC=${3:-}; AV1=${4:-}
+BIN=$(cd "$1" && pwd); OUT=$(mkdir -p "$2" && cd "$2" && pwd); HEVC=${3:-}; AV1=${4:-}
+[[ -n "$HEVC" && -f "$HEVC" ]] && HEVC="$(cd "$(dirname "$HEVC")" && pwd)/$(basename "$HEVC")"
+[[ -n "$AV1" && -f "$AV1" ]] && AV1="$(cd "$(dirname "$AV1")" && pwd)/$(basename "$AV1")"
 FF="$BIN/ffmpeg.exe"; FP="$BIN/ffprobe.exe"
 fail=0
 ok()  { echo "PASS: $*"; }

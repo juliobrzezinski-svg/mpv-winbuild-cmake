@@ -45,6 +45,8 @@ fetch_git() {
     got=$(git -C "$dir" rev-parse 'FETCH_HEAD^{commit}')
     if [[ "$got" != "$commit" ]]; then echo "ERROR: $name: expected $commit, got $got"; exit 1; fi
     git -C "$dir" -c advice.detachedHead=false checkout -q "$commit"
+    # keep the tag name so "git describe" (FFmpeg version string) reports e.g. n8.0.1
+    if [[ "$ref" == refs/tags/* ]]; then git -C "$dir" tag "${ref#refs/tags/}" "$commit"; fi
     git -C "$dir" archive --format=tar --prefix="$name-${commit:0:12}/" "$commit" | gzip -9 \
         > "$OUT/sources/src-$name-${commit:0:12}.tar.gz"
 }
