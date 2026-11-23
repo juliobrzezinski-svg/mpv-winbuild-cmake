@@ -7,6 +7,13 @@ defaults:
     shell: bash
 
 on:
+  # push: build + check only (also registers the workflow, which lives outside the default branch);
+  # the Release is created only from workflow_dispatch.
+  push:
+    branches: [videosport-lgpl]
+    paths:
+      - 'videosport-ffmpeg/**'
+      - '.github/workflows/videosport-ffmpeg.yml'
   workflow_dispatch:
     inputs:
       release:
@@ -104,7 +111,7 @@ jobs:
     name: Release
     needs: [build, check]
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.release != 'false' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release != 'false' }}
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
