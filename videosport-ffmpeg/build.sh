@@ -137,7 +137,7 @@ $HOST-strip "$PKG/ffmpeg.exe" "$PKG/ffprobe.exe"
 echo "--- DLL imports (must be Windows system DLLs only) ---"
 for exe in "$PKG"/*.exe; do
     $HOST-objdump -p "$exe" | awk '/DLL Name:/{print $3}' | sort -u | tee "$W/imports-$(basename "$exe").txt"
-    if grep -viE '^(kernel32|user32|gdi32|advapi32|shell32|ole32|oleaut32|bcrypt|msvcrt|ws2_32|secur32|psapi|shlwapi|ucrtbase|api-ms-win-.*)\.dll$' \
+    if grep -viE '^(kernel32|user32|gdi32|advapi32|avicap32|shell32|ole32|oleaut32|bcrypt|msvcrt|ws2_32|secur32|psapi|shlwapi|ucrtbase|api-ms-win-.*)\.dll$' \
         "$W/imports-$(basename "$exe").txt"; then echo "ERROR: unexpected DLL dependency in $exe"; exit 1; fi
 done
 cp "$S/ffmpeg/COPYING.GPLv2" "$PKG/licenses/FFmpeg-COPYING.GPLv2.txt"
